@@ -5,10 +5,13 @@ $(function() {
     $('#btnUpdate').click(function() {
         $.ajax({
             url: '/updateWish',
-            data: {
-                title: $('#editTitle').val(),
-                description: $('#editDescription').val(),
-                id: localStorage.getItem('editId')
+            data : {
+                title:$('#editTitle').val(),
+                description:$('#editDescription').val(),
+                id:localStorage.getItem('editId'),
+                filePath:$('#imgUpload').attr('src'),
+                isPrivate:$('#chkPrivate').is(':checked')?1:0,
+                isDone:$('#chkDone').is(':checked')?1:0
             },
             type: 'POST',
             success: function(res) {
@@ -130,6 +133,16 @@ function Edit(elm) {
             //Populate the Pop up
             $('#editTitle').val(data[0]['Title']);
             $('#editDescription').val(data[0]['Description']);
+
+            $('#imgUpload').attr('src', data[0]['FilePath']);
+
+            if (data[0]['Private'] == "1") {
+                $('#chkPrivate').attr('checked', 'checked');
+            }
+
+            if (data[0]['Done'] == "1") {
+                $('#chkDone').attr('checked', 'checked');
+            }
 
             // Trigger the Pop Up
             $('#editModal').modal();
