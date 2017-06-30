@@ -209,9 +209,10 @@ def getAllWishes():
     try:
         if session.get('user'):
 
+            _user = session.get('user')
             conn = mysql.connect()
             cursor = conn.cursor()
-            cursor.callproc('sp_GetAllWishes')
+            cursor.callproc('sp_GetAllWishes', (_user,))
             result = cursor.fetchall()
 
             wishes_dict = []
@@ -220,7 +221,9 @@ def getAllWishes():
                     'Id': wish[0],
                     'Title': wish[1],
                     'Description': wish[2],
-                    'FilePath': wish[3]}
+                    'FilePath': wish[3],
+                    'Like': wish[4],
+                    'HasLiked': wish[5]}
                 wishes_dict.append(wish_dict)
 
             return json.dumps(wishes_dict)
@@ -299,7 +302,15 @@ def addUpdateLike():
 
             if len(data) is 0:
                 conn.commit()
-                return json.dumps({'status': 'OK'})
+                cursor.close()
+                conn.close()
+
+                conn = mysql.connect()
+                cursor = conn.cursor()
+                cursor.callproc('sp_getLikeStatus', (_wishId, _user))
+                result = cursor.fetchall()
+
+                return json.dumps({'status': 'OK', 'total': result[0][0], 'likeStatus': result[0][1]})
             else:
                 return render_template('error.html', error='An error occurred!')
 
